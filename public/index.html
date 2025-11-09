@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login with Sonatype</title>
+  <script>
+    function getAuthorizationCodeFromUrl() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get("code");
+    }
+
+    async function exchangeCode(code) {
+      const response = await fetch("/exchange", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
+      const data = await response.json();
+      document.getElementById("authorization-code").textContent =
+        data.access_token
+          ? "Access Token: " + data.access_token
+          : "Failed to get token: " + JSON.stringify(data);
+    }
+
+    function loginWithSonatype() {
+      const redirectUri = encodeURIComponent(window.location.origin);
+      const authUrl = `https://mcp.guide.sonatype.com/authorize?client_id=Gfd74wKsjIYuhO8gEIieIN1y64Tmg5ku&response_type=code&redirect_uri=${redirectUri}`;
+      window.location.href = authUrl;
+    }
+
+    window.onload = () => {
+      const code = getAuthorizationCodeFromUrl();
+      if (code) exchangeCode(code);
+    };
+  </script>
+</head>
+<body>
+  <h1>Login with Sonatype</h1>
+  <button onclick="loginWithSonatype()">Login</button>
+  <p id="authorization-code"></p>
+</body>
+</html>
